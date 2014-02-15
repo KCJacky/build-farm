@@ -44,3 +44,13 @@ cd ..
 cd gcc-build
 make
 make install
+cd ..
+
+mkdir -p cmake-build
+cd cmake-build
+../cmake-2.8.12.2/configure --prefix=/jenkins-worker
+make -j 3
+make install
+cd ..
+
+export PATH="/jenkins-worker/bin:$PATH"

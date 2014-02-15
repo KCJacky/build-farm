@@ -1,3 +1,4 @@
 /binutils-build
+/cmake-build
 /gcc-build
 /mingw-build
