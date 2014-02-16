@@ -2,6 +2,10 @@
 
 set -e
 
+# ----------------------------------------------------------------------------------------------------------------
+#  Binutils
+# ----------------------------------------------------------------------------------------------------------------
+
 mkdir -p binutils-build
 cd binutils-build
 rm -rf *
@@ -10,6 +14,10 @@ rm -rf *
 make
 make install
 cd ..
+
+# ----------------------------------------------------------------------------------------------------------------
+#  MinGW headers
+# ----------------------------------------------------------------------------------------------------------------
 
 export PATH="/jenkins-worker/mingw/bin:$PATH"
 
@@ -24,6 +32,10 @@ mkdir -p /jenkins-worker/mingw/x86_64-w64-mingw32/lib
 ln -s /jenkins-worker/mingw/x86_64-w64-mingw32/lib /jenkins-worker/mingw/x86_64-w64-mingw32/lib64
 cd ..
 
+# ----------------------------------------------------------------------------------------------------------------
+#  GCC bootstrap
+# ----------------------------------------------------------------------------------------------------------------
+
 mkdir -p gcc-build
 cd gcc-build
 rm -rf *
@@ -33,6 +45,10 @@ make all-gcc
 make install-gcc
 cd ..
 
+# ----------------------------------------------------------------------------------------------------------------
+#  MinGW runtime libraries
+# ----------------------------------------------------------------------------------------------------------------
+
 cd mingw-build
 ../mingw-w64-v3.1.0/configure --build=`../binutils-2.24/config.guess` --host=x86_64-w64-mingw32 \
 	--enable-lib32 --with-sysroot=/jenkins-worker/mingw --prefix=/jenkins-worker/mingw/x86_64-w64-mingw32 \
@@ -41,10 +57,18 @@ make
 make install
 cd ..
 
+# ----------------------------------------------------------------------------------------------------------------
+#  GCC
+# ----------------------------------------------------------------------------------------------------------------
+
 cd gcc-build
 make
 make install
 cd ..
+
+# ----------------------------------------------------------------------------------------------------------------
+#  CMake (not cross-platform)
+# ----------------------------------------------------------------------------------------------------------------
 
 mkdir -p cmake-build
 cd cmake-build
@@ -58,6 +82,10 @@ export PATH="/jenkins-worker/bin:$PATH"
 mkdir -p /jenkins-worker/cmake
 cp -f mingw32.cmake /jenkins-worker/cmake/
 cp -f mingw64.cmake /jenkins-worker/cmake/
+
+# ----------------------------------------------------------------------------------------------------------------
+#  zlib
+# ----------------------------------------------------------------------------------------------------------------
 
 mkdir -p zlib-build
 cd zlib-build
@@ -74,4 +102,77 @@ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/jenkins-worker/cmake/mi
 	-DCMAKE_INSTALL_PREFIX=/jenkins-worker/mingw/win64 ../zlib-1.2.8
 make
 make install
+cd ..
+
+ln -fs libzlib.dll.a /jenkins-worker/mingw/win32/lib/libz.a
+ln -fs libzlib.dll.a /jenkins-worker/mingw/win64/lib/libz.a
+
+# ----------------------------------------------------------------------------------------------------------------
+#  OpenSSL
+# ----------------------------------------------------------------------------------------------------------------
+
+clean_openssl()
+{
+	make clean
+	rm -f test/dummytest.exe crypto/Makefile.tmp krb5.h crypto/comp/Makefile.tmp crypto/aes/aes-586.s \
+		crypto/bf/bf-586.s crypto/bn/bn-586.s crypto/bn/co-586.s crypto/bn/x86-mont.s crypto/camellia/cmll-x86.s \
+		crypto/des/crypt586.s crypto/des/des-586.s crypto/md5/md5-586.s crypto/rc4/rc4-586.s \
+		crypto/ripemd/rmd-586.s crypto/sha/sha1-586.s crypto/sha/sha256-586.s crypto/sha/sha512-586.s \
+		crypto/uplink-cof.s crypto/whrlpool/wp-mmx.s crypto/x86cpuid.s
+	git checkout tools/c_rehash crypto/opensslconf.h apps/CA.pl Makefile.bak Makefile apps/Makefile \
+		crypto/Makefile crypto/aes/Makefile crypto/asn1/Makefile crypto/bio/Makefile crypto/bn/Makefile \
+		crypto/buffer/Makefile crypto/cms/Makefile crypto/conf/Makefile crypto/des/Makefile crypto/dh/Makefile \
+		crypto/dsa/Makefile crypto/dso/Makefile crypto/ec/Makefile crypto/ecdh/Makefile crypto/engine/Makefile \
+		crypto/err/Makefile crypto/evp/Makefile crypto/hmac/Makefile crypto/lhash/Makefile \
+		crypto/objects/Makefile crypto/ocsp/Makefile crypto/opensslconf.h crypto/pem/Makefile \
+		crypto/pkcs12/Makefile crypto/pkcs7/Makefile crypto/pqueue/Makefile crypto/rand/Makefile \
+		crypto/rc4/Makefile crypto/rsa/Makefile crypto/sha/Makefile crypto/stack/Makefile crypto/ts/Makefile \
+		crypto/txt_db/Makefile crypto/ui/Makefile crypto/x509/Makefile crypto/x509v3/Makefile \
+		engines/Makefile test/Makefile crypto/Makefile.save crypto/aes/Makefile.save crypto/bn/Makefile.save \
+		crypto/buffer/Makefile.save crypto/des/Makefile.save crypto/dh/Makefile.save crypto/dsa/Makefile.save \
+		crypto/dso/Makefile.save crypto/ec/Makefile.save crypto/ecdh/Makefile.save crypto/engine/Makefile.save \
+		crypto/hmac/Makefile.save crypto/objects/Makefile.save crypto/rc4/Makefile.save crypto/rsa/Makefile.save \
+		crypto/sha/Makefile.save crypto/bf/Makefile.save crypto/camellia/Makefile.save crypto/cast/Makefile.save \
+		crypto/comp/Makefile.save crypto/ecdsa/Makefile.save crypto/idea/Makefile.save crypto/krb5/Makefile.save \
+		crypto/md4/Makefile.save crypto/md5/Makefile.save crypto/mdc2/Makefile.save crypto/rc2/Makefile.save \
+		crypto/ripemd/Makefile.save crypto/seed/Makefile.save crypto/whrlpool/Makefile.save \
+		engines/ccgost/Makefile.save ssl/Makefile.save
+}
+
+mkdir -p openssl-1.0.0l
+cd openssl-1.0.0l
+clean_openssl
+export WINDRES_TARGET=--target=pe-i386
+./Configure --cross-compile-prefix="x86_64-w64-mingw32-" --prefix=/jenkins-worker/mingw/win32 \
+	-m32 -I/jenkins-worker/mingw/win32/include -L/jenkins-worker/mingw/win32/lib \
+	mingw zlib shared
+make depend
+make
+make install
+clean_openssl
+mv -f /jenkins-worker/mingw/win32/lib/libssl.a /jenkins-worker/mingw/win32/lib/libsslstatic.a
+mv -f /jenkins-worker/mingw/win32/lib/libcrypto.a /jenkins-worker/mingw/win32/lib/libcryptostatic.a
+mv -f /jenkins-worker/mingw/win32/lib/libssl.dll.a /jenkins-worker/mingw/win32/lib/libssl.a
+mv -f /jenkins-worker/mingw/win32/lib/libcrypto.dll.a /jenkins-worker/mingw/win32/lib/libcrypto.a
+ln -s libssl.a /jenkins-worker/mingw/win32/lib/libssl.dll.a
+ln -s libcrypto.a /jenkins-worker/mingw/win32/lib/libcrypto.dll.a
+cd ..
+
+mkdir -p openssl-1.0.0l
+cd openssl-1.0.0l
+clean_openssl
+export WINDRES_TARGET=--target=pe-x86-64
+./Configure --cross-compile-prefix="x86_64-w64-mingw32-" --prefix=/jenkins-worker/mingw/win64 \
+	-m64 -I/jenkins-worker/mingw/win64/include -L/jenkins-worker/mingw/win64/lib \
+	mingw64 zlib shared
+make depend
+make
+make install
+clean_openssl
+mv -f /jenkins-worker/mingw/win64/lib/libssl.a /jenkins-worker/mingw/win64/lib/libsslstatic.a
+mv -f /jenkins-worker/mingw/win64/lib/libcrypto.a /jenkins-worker/mingw/win64/lib/libcryptostatic.a
+mv -f /jenkins-worker/mingw/win64/lib/libssl.dll.a /jenkins-worker/mingw/win64/lib/libssl.a
+mv -f /jenkins-worker/mingw/win64/lib/libcrypto.dll.a /jenkins-worker/mingw/win64/lib/libcrypto.a
+ln -s libssl.a /jenkins-worker/mingw/win64/lib/libssl.dll.a
+ln -s libcrypto.a /jenkins-worker/mingw/win64/lib/libcrypto.dll.a
 cd ..
