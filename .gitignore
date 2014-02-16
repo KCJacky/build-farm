@@ -1,6 +1,8 @@
 /binutils-build
 /cmake-build
 /gcc-build
+/icu-build
+/icu-cross-build
 /mingw-build
 /zlib-build
 /zlib-1.2.8/zconf.h.included

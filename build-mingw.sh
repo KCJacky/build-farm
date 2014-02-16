@@ -176,3 +176,37 @@ mv -f /jenkins-worker/mingw/win64/lib/libcrypto.dll.a /jenkins-worker/mingw/win6
 ln -s libssl.a /jenkins-worker/mingw/win64/lib/libssl.dll.a
 ln -s libcrypto.a /jenkins-worker/mingw/win64/lib/libcrypto.dll.a
 cd ..
+
+# ----------------------------------------------------------------------------------------------------------------
+#  ICU
+# ----------------------------------------------------------------------------------------------------------------
+
+mkdir -p icu-build
+cd icu-build
+rm -rf *
+../icu4c-52_1/source/configure
+make
+cd ..
+
+mkdir -p icu-cross-build
+cd icu-cross-build
+rm -rf *
+CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O2 -m32" CXXFLAGS="-O2 -m32 --std=c++03" \
+CPPFLAGS="-m32" AR=x86_64-w64-mingw32-ar RANLIB=x86_64-w64-mingw32-ranlib \
+	../icu4c-52_1/source/configure --prefix=/jenkins-worker/mingw/win32 --enable-static --enable-shared=no \
+	--enable-tests=no --enable-samples=no --enable-dyload=no --enable-strict=no --enable-extras=no \
+	--host=i686-w64-mingw32 --with-cross-build=`pwd`/../icu-build
+make -j 3
+make install
+cd ..
+
+cd icu-cross-build
+rm -rf *
+CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O2 -m64" CXXFLAGS="-O2 -m64 --std=c++03" \
+CPPFLAGS="-m64" AR=x86_64-w64-mingw32-ar RANLIB=x86_64-w64-mingw32-ranlib \
+	../icu4c-52_1/source/configure --prefix=/jenkins-worker/mingw/win64 --enable-static --enable-shared=no \
+	--enable-tests=no --enable-samples=no --enable-dyload=no --enable-strict=no --enable-extras=no \
+	--host=x86_64-w64-mingw32 --with-cross-build=`pwd`/../icu-build
+make -j 3
+make install
+cd ..
