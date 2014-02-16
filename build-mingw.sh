@@ -2,6 +2,9 @@
 
 set -e
 
+# apt-get install build-essential flex bison patch
+git submodule update --init --recursive
+
 # ----------------------------------------------------------------------------------------------------------------
 #  Binutils
 # ----------------------------------------------------------------------------------------------------------------
@@ -193,7 +196,7 @@ cd icu-cross-build
 rm -rf *
 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O2 -m32" CXXFLAGS="-O2 -m32 --std=c++03" \
 CPPFLAGS="-m32" AR=x86_64-w64-mingw32-ar RANLIB=x86_64-w64-mingw32-ranlib \
-	../icu4c-52_1/source/configure --prefix=/jenkins-worker/mingw/win32 --enable-static --enable-shared=no \
+	../icu4c-52_1/source/configure --prefix=/jenkins-worker/mingw/win32 --disable-static --enable-shared=yes \
 	--enable-tests=no --enable-samples=no --enable-dyload=no --enable-strict=no --enable-extras=no \
 	--host=i686-w64-mingw32 --with-cross-build=`pwd`/../icu-build
 make -j 3
@@ -204,9 +207,49 @@ cd icu-cross-build
 rm -rf *
 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O2 -m64" CXXFLAGS="-O2 -m64 --std=c++03" \
 CPPFLAGS="-m64" AR=x86_64-w64-mingw32-ar RANLIB=x86_64-w64-mingw32-ranlib \
-	../icu4c-52_1/source/configure --prefix=/jenkins-worker/mingw/win64 --enable-static --enable-shared=no \
+	../icu4c-52_1/source/configure --prefix=/jenkins-worker/mingw/win64 --disable-static --enable-shared=yes \
 	--enable-tests=no --enable-samples=no --enable-dyload=no --enable-strict=no --enable-extras=no \
 	--host=x86_64-w64-mingw32 --with-cross-build=`pwd`/../icu-build
 make -j 3
 make install
 cd ..
+
+for lib in icudt icuin icuio icule iculx icutest icutu icuuc; do
+	ln -fs ${lib}.dll.a /jenkins-worker/mingw/win32/lib/lib${lib}.a
+	ln -fs ${lib}.dll.a /jenkins-worker/mingw/win64/lib/lib${lib}.a
+done
+
+# ----------------------------------------------------------------------------------------------------------------
+#  ANGLE
+# ----------------------------------------------------------------------------------------------------------------
+
+git submodule update angle
+
+cd angle
+patch -p1 -i ../angle-patch/angle.patch
+../angle-patch/make_commit_h.sh
+cd ..
+
+mkdir -p angle-build
+cd angle-build
+rm -rf *
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=`pwd`/../mingw32.cmake \
+	-DCMAKE_INSTALL_PREFIX=/jenkins-worker/mingw/win32 ../angle-patch
+make -j 3
+make install
+cd ..
+
+cd angle-build
+rm -rf *
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=`pwd`/../mingw64.cmake \
+	-DCMAKE_INSTALL_PREFIX=/jenkins-worker/mingw/win64 ../angle-patch
+make -j 3
+make install
+cd ..
+
+rm -f angle/src/common/commit.h
+
+ln -fs libEGL.dll.a /jenkins-worker/mingw/win32/lib/libEGL.a
+ln -fs libGLESv2.dll.a /jenkins-worker/mingw/win32/lib/libGLESv2.a
+ln -fs libEGL.dll.a /jenkins-worker/mingw/win64/lib/libEGL.a
+ln -fs libGLESv2.dll.a /jenkins-worker/mingw/win64/lib/libGLESv2.a

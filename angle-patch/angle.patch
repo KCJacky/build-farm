@@ -1,0 +1,113 @@
+diff --git a/src/libGLESv2/renderer/IndexRangeCache.h b/src/libGLESv2/renderer/IndexRangeCache.h
+index 5683430..f1a4a72 100644
+--- a/src/libGLESv2/renderer/IndexRangeCache.h
++++ b/src/libGLESv2/renderer/IndexRangeCache.h
+@@ -55,4 +55,4 @@ class IndexRangeCache
+ 
+ }
+ 
+-#endif LIBGLESV2_RENDERER_INDEXRANGECACHE_H
++#endif // LIBGLESV2_RENDERER_INDEXRANGECACHE_H
+diff --git a/src/libGLESv2/renderer/Renderer.cpp b/src/libGLESv2/renderer/Renderer.cpp
+index 4bd4dcf..d63be6c 100644
+--- a/src/libGLESv2/renderer/Renderer.cpp
++++ b/src/libGLESv2/renderer/Renderer.cpp
+@@ -12,9 +12,10 @@
+ #include "libGLESv2/Program.h"
+ #include "libGLESv2/renderer/Renderer.h"
+ #include "libGLESv2/renderer/d3d9/Renderer9.h"
+-#include "libGLESv2/renderer/d3d11/Renderer11.h"
++//#include "libGLESv2/renderer/d3d11/Renderer11.h"
+ #include "libGLESv2/utilities.h"
+-#include "third_party/trace_event/trace_event.h"
++//#include "third_party/trace_event/trace_event.h"
++#define TRACE_EVENT0(x, y)
+ 
+ #if !defined(ANGLE_ENABLE_D3D11)
+ // Enables use of the Direct3D 11 API for a default display, when available
+@@ -181,12 +182,14 @@ rx::Renderer *glCreateRenderer(egl::Display *display, HDC hDc, EGLNativeDisplayT
+         displayId == EGL_D3D11_ELSE_D3D9_DISPLAY_ANGLE ||
+         displayId == EGL_D3D11_ONLY_DISPLAY_ANGLE)
+     {
++    /*
+         renderer = new rx::Renderer11(display, hDc);
+     
+         if (renderer)
+         {
+             status = renderer->initialize();
+         }
++    */
+ 
+         if (status == EGL_SUCCESS)
+         {
+diff --git a/src/libGLESv2/renderer/ShaderExecutable.h b/src/libGLESv2/renderer/ShaderExecutable.h
+index 293e340..7d4abc0 100644
+--- a/src/libGLESv2/renderer/ShaderExecutable.h
++++ b/src/libGLESv2/renderer/ShaderExecutable.h
+@@ -26,7 +26,7 @@ class ShaderExecutable
+     
+     virtual ~ShaderExecutable()
+     {
+-        delete[] mFunction;
++        delete[] reinterpret_cast<char *>(mFunction);
+     }
+ 
+     void *getFunction() const
+diff --git a/src/libGLESv2/renderer/d3d9/BufferStorage9.cpp b/src/libGLESv2/renderer/d3d9/BufferStorage9.cpp
+index 9fdc124..c24cb94 100644
+--- a/src/libGLESv2/renderer/d3d9/BufferStorage9.cpp
++++ b/src/libGLESv2/renderer/d3d9/BufferStorage9.cpp
+@@ -22,7 +22,7 @@ BufferStorage9::BufferStorage9()
+ 
+ BufferStorage9::~BufferStorage9()
+ {
+-    delete[] mMemory;
++    delete[] reinterpret_cast<char *>(mMemory);
+ }
+ 
+ BufferStorage9 *BufferStorage9::makeBufferStorage9(BufferStorage *bufferStorage)
+@@ -48,7 +48,7 @@ void BufferStorage9::setData(const void* data, unsigned int size, unsigned int o
+             memcpy(newMemory, mMemory, std::min(offset, mAllocatedSize));
+         }
+ 
+-        delete[] mMemory;
++        delete[] reinterpret_cast<char *>(mMemory);
+         mMemory = newMemory;
+         mAllocatedSize = newAllocatedSize;
+     }
+diff --git a/src/libGLESv2/renderer/d3d9/Renderer9.cpp b/src/libGLESv2/renderer/d3d9/Renderer9.cpp
+index 97a10d6..1dabd13 100644
+--- a/src/libGLESv2/renderer/d3d9/Renderer9.cpp
++++ b/src/libGLESv2/renderer/d3d9/Renderer9.cpp
+@@ -30,7 +30,8 @@
+ 
+ #include "libEGL/Display.h"
+ 
+-#include "third_party/trace_event/trace_event.h"
++// #include "third_party/trace_event/trace_event.h"
++#define TRACE_EVENT0(x, y)
+ 
+ // Can also be enabled by defining FORCE_REF_RAST in the project's predefined macros
+ #define REF_RAST 0
+@@ -2337,7 +2338,7 @@ bool Renderer9::getEventQuerySupport()
+ 
+ unsigned int Renderer9::getMaxVertexTextureImageUnits() const
+ {
+-    META_ASSERT(MAX_TEXTURE_IMAGE_UNITS_VTF_SM3 <= gl::IMPLEMENTATION_MAX_VERTEX_TEXTURE_IMAGE_UNITS);
++    META_ASSERT((int)MAX_TEXTURE_IMAGE_UNITS_VTF_SM3 <= (int)gl::IMPLEMENTATION_MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+     return mVertexTextureSupport ? MAX_TEXTURE_IMAGE_UNITS_VTF_SM3 : 0;
+ }
+ 
+diff --git a/src/libGLESv2/renderer/d3d9/SwapChain9.cpp b/src/libGLESv2/renderer/d3d9/SwapChain9.cpp
+index dd8895d..c4a89c5 100644
+--- a/src/libGLESv2/renderer/d3d9/SwapChain9.cpp
++++ b/src/libGLESv2/renderer/d3d9/SwapChain9.cpp
+@@ -317,7 +317,7 @@ EGLint SwapChain9::swapRect(EGLint x, EGLint y, EGLint width, EGLint height)
+         device->SetStreamSourceFreq(streamIndex, 1);
+     }
+ 
+-    D3DVIEWPORT9 viewport = {0, 0, mWidth, mHeight, 0.0f, 1.0f};
++    D3DVIEWPORT9 viewport = {0, 0, (DWORD)mWidth, (DWORD)mHeight, 0.0f, 1.0f};
+     device->SetViewport(&viewport);
+ 
+     float x1 = x - 0.5f;

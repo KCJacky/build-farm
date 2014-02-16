@@ -1,9 +1,14 @@
+/angle-build
 /binutils-build
 /cmake-build
 /gcc-build
 /icu-build
 /icu-cross-build
 /mingw-build
+/qt-build
+/qt-everywhere-opensource-src-5.2.1/qtbase/.device.vars
+/qt-everywhere-opensource-src-5.2.1/qtbase/.qmake.vars
+/qt-everywhere-opensource-src-5.2.1/qtbase/config.tests/.qmake.cache
 /zlib-build
 /zlib-1.2.8/zconf.h.included
 /openssl-1.0.0l/apps/*.o

@@ -3,7 +3,7 @@ SET(CMAKE_SYSTEM_NAME Windows)
 
 SET(CMAKE_C_COMPILER "x86_64-w64-mingw32-gcc")
 SET(CMAKE_CXX_COMPILER "x86_64-w64-mingw32-g++")
-SET(CMAKE_AR "x86_64-w64-mingw32-ar")
+SET(CMAKE_AR "x86_64-w64-mingw32-ar" CACHE STRING "Path to the AR program" FORCE)
 SET(CMAKE_LINKER "x86_64-w64-mingw32-ld")
 SET(CMAKE_NM "x86_64-w64-mingw32-nm")
 SET(CMAKE_OBJCOPY "x86_64-w64-mingw32-objcopy")
