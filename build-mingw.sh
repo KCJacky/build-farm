@@ -54,3 +54,24 @@ make install
 cd ..
 
 export PATH="/jenkins-worker/bin:$PATH"
+
+mkdir -p /jenkins-worker/cmake
+cp -f mingw32.cmake /jenkins-worker/cmake/
+cp -f mingw64.cmake /jenkins-worker/cmake/
+
+mkdir -p zlib-build
+cd zlib-build
+rm -rf *
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/jenkins-worker/cmake/mingw32.cmake \
+	-DCMAKE_INSTALL_PREFIX=/jenkins-worker/mingw/win32 ../zlib-1.2.8
+make
+make install
+cd ..
+
+cd zlib-build
+rm -rf *
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/jenkins-worker/cmake/mingw64.cmake \
+	-DCMAKE_INSTALL_PREFIX=/jenkins-worker/mingw/win64 ../zlib-1.2.8
+make
+make install
+cd ..

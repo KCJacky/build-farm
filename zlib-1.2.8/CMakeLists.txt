@@ -174,7 +174,7 @@ if(MINGW)
     endif()
 
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj
-                       COMMAND ${CMAKE_RC_COMPILER}
+                       COMMAND ${CMAKE_RC_COMPILER} ${CMAKE_RC_FLAGS}
                             -D GCC_WINDRES
                             -I ${CMAKE_CURRENT_SOURCE_DIR}
                             -I ${CMAKE_CURRENT_BINARY_DIR}

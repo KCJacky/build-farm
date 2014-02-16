@@ -2,3 +2,5 @@
 /cmake-build
 /gcc-build
 /mingw-build
+/zlib-build
+/zlib-1.2.8/zconf.h.included
