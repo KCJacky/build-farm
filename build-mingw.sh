@@ -251,6 +251,10 @@ cd ..
 
 rm -f angle/src/common/commit.h
 
+cd angle
+git checkout .
+cd ..
+
 ln -fs libEGL.dll.a $INSTALL_ROOT/mingw/win32/lib/libEGL.a
 ln -fs libGLESv2.dll.a $INSTALL_ROOT/mingw/win32/lib/libGLESv2.a
 ln -fs libEGL.dll.a $INSTALL_ROOT/mingw/win64/lib/libEGL.a
