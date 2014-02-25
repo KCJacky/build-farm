@@ -118,7 +118,7 @@ ln -fs libzlib.dll.a $INSTALL_ROOT/mingw/win64/lib/libz.a
 
 clean_openssl()
 {
-	make clean
+	make clean || true
 	rm -f test/dummytest.exe crypto/Makefile.tmp krb5.h crypto/comp/Makefile.tmp crypto/aes/aes-586.s \
 		crypto/bf/bf-586.s crypto/bn/bn-586.s crypto/bn/co-586.s crypto/bn/x86-mont.s crypto/camellia/cmll-x86.s \
 		crypto/des/crypt586.s crypto/des/des-586.s crypto/md5/md5-586.s crypto/rc4/rc4-586.s \
