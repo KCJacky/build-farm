@@ -2,7 +2,9 @@
 
 set -e
 
-# apt-get install build-essential flex bison patch
+INSTALL_ROOT=/var/build-farm
+
+sudo apt-get install build-essential flex bison patch gettext texinfo
 git submodule update --init --recursive
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -13,7 +15,7 @@ mkdir -p binutils-build
 cd binutils-build
 rm -rf *
 ../binutils-2.24/configure --target=x86_64-w64-mingw32 --enable-targets=x86_64-w64-mingw32,i686-w64-mingw32 \
-	--with-sysroot=/jenkins-worker/mingw --prefix=/jenkins-worker/mingw
+	--with-sysroot=$INSTALL_ROOT/mingw --prefix=$INSTALL_ROOT/mingw
 make
 make install
 cd ..
@@ -22,17 +24,17 @@ cd ..
 #  MinGW headers
 # ----------------------------------------------------------------------------------------------------------------
 
-export PATH="/jenkins-worker/mingw/bin:$PATH"
+export PATH="$INSTALL_ROOT/mingw/bin:$PATH"
 
 mkdir -p mingw-build
 cd mingw-build
 rm -rf *
 ../mingw-w64-v3.1.0/configure --build=`../binutils-2.24/config.guess` --host=x86_64-w64-mingw32 \
-	--prefix=/jenkins-worker/mingw/x86_64-w64-mingw32 --without-crt
+	--prefix=$INSTALL_ROOT/mingw/x86_64-w64-mingw32 --without-crt
 make install
-ln -fs /jenkins-worker/mingw/x86_64-w64-mingw32 /jenkins-worker/mingw/mingw
-mkdir -p /jenkins-worker/mingw/x86_64-w64-mingw32/lib
-ln -s /jenkins-worker/mingw/x86_64-w64-mingw32/lib /jenkins-worker/mingw/x86_64-w64-mingw32/lib64
+ln -fs $INSTALL_ROOT/mingw/x86_64-w64-mingw32 $INSTALL_ROOT/mingw/mingw
+mkdir -p $INSTALL_ROOT/mingw/x86_64-w64-mingw32/lib
+ln -s $INSTALL_ROOT/mingw/x86_64-w64-mingw32/lib $INSTALL_ROOT/mingw/x86_64-w64-mingw32/lib64
 cd ..
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -42,8 +44,8 @@ cd ..
 mkdir -p gcc-build
 cd gcc-build
 rm -rf *
-../gcc-4.8.2/configure --target=x86_64-w64-mingw32 --enable-targets=all --with-sysroot=/jenkins-worker/mingw \
-	--prefix=/jenkins-worker/mingw
+../gcc-4.8.2/configure --target=x86_64-w64-mingw32 --enable-targets=all --with-sysroot=$INSTALL_ROOT/mingw \
+	--prefix=$INSTALL_ROOT/mingw
 make all-gcc
 make install-gcc
 cd ..
@@ -54,7 +56,7 @@ cd ..
 
 cd mingw-build
 ../mingw-w64-v3.1.0/configure --build=`../binutils-2.24/config.guess` --host=x86_64-w64-mingw32 \
-	--enable-lib32 --with-sysroot=/jenkins-worker/mingw --prefix=/jenkins-worker/mingw/x86_64-w64-mingw32 \
+	--enable-lib32 --with-sysroot=$INSTALL_ROOT/mingw --prefix=$INSTALL_ROOT/mingw/x86_64-w64-mingw32 \
 	--with-crt
 make
 make install
@@ -75,16 +77,16 @@ cd ..
 
 mkdir -p cmake-build
 cd cmake-build
-../cmake-2.8.12.2/configure --prefix=/jenkins-worker
+../cmake-2.8.12.2/configure --prefix=$INSTALL_ROOT
 make -j 3
 make install
 cd ..
 
-export PATH="/jenkins-worker/bin:$PATH"
+export PATH="$INSTALL_ROOT/bin:$PATH"
 
-mkdir -p /jenkins-worker/cmake
-cp -f mingw32.cmake /jenkins-worker/cmake/
-cp -f mingw64.cmake /jenkins-worker/cmake/
+mkdir -p $INSTALL_ROOT/cmake
+cp -f mingw32.cmake $INSTALL_ROOT/cmake/
+cp -f mingw64.cmake $INSTALL_ROOT/cmake/
 
 # ----------------------------------------------------------------------------------------------------------------
 #  zlib
@@ -93,22 +95,22 @@ cp -f mingw64.cmake /jenkins-worker/cmake/
 mkdir -p zlib-build
 cd zlib-build
 rm -rf *
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/jenkins-worker/cmake/mingw32.cmake \
-	-DCMAKE_INSTALL_PREFIX=/jenkins-worker/mingw/win32 ../zlib-1.2.8
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$INSTALL_ROOT/cmake/mingw32.cmake \
+	-DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/mingw/win32 ../zlib-1.2.8
 make
 make install
 cd ..
 
 cd zlib-build
 rm -rf *
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/jenkins-worker/cmake/mingw64.cmake \
-	-DCMAKE_INSTALL_PREFIX=/jenkins-worker/mingw/win64 ../zlib-1.2.8
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$INSTALL_ROOT/cmake/mingw64.cmake \
+	-DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/mingw/win64 ../zlib-1.2.8
 make
 make install
 cd ..
 
-ln -fs libzlib.dll.a /jenkins-worker/mingw/win32/lib/libz.a
-ln -fs libzlib.dll.a /jenkins-worker/mingw/win64/lib/libz.a
+ln -fs libzlib.dll.a $INSTALL_ROOT/mingw/win32/lib/libz.a
+ln -fs libzlib.dll.a $INSTALL_ROOT/mingw/win64/lib/libz.a
 
 # ----------------------------------------------------------------------------------------------------------------
 #  OpenSSL
@@ -146,38 +148,38 @@ mkdir -p openssl-1.0.0l
 cd openssl-1.0.0l
 clean_openssl
 export WINDRES_TARGET=--target=pe-i386
-./Configure --cross-compile-prefix="x86_64-w64-mingw32-" --prefix=/jenkins-worker/mingw/win32 \
-	-m32 -I/jenkins-worker/mingw/win32/include -L/jenkins-worker/mingw/win32/lib \
+./Configure --cross-compile-prefix="x86_64-w64-mingw32-" --prefix=$INSTALL_ROOT/mingw/win32 \
+	-m32 -I$INSTALL_ROOT/mingw/win32/include -L$INSTALL_ROOT/mingw/win32/lib \
 	mingw zlib shared
 make depend
 make
 make install
 clean_openssl
-mv -f /jenkins-worker/mingw/win32/lib/libssl.a /jenkins-worker/mingw/win32/lib/libsslstatic.a
-mv -f /jenkins-worker/mingw/win32/lib/libcrypto.a /jenkins-worker/mingw/win32/lib/libcryptostatic.a
-mv -f /jenkins-worker/mingw/win32/lib/libssl.dll.a /jenkins-worker/mingw/win32/lib/libssl.a
-mv -f /jenkins-worker/mingw/win32/lib/libcrypto.dll.a /jenkins-worker/mingw/win32/lib/libcrypto.a
-ln -s libssl.a /jenkins-worker/mingw/win32/lib/libssl.dll.a
-ln -s libcrypto.a /jenkins-worker/mingw/win32/lib/libcrypto.dll.a
+mv -f $INSTALL_ROOT/mingw/win32/lib/libssl.a $INSTALL_ROOT/mingw/win32/lib/libsslstatic.a
+mv -f $INSTALL_ROOT/mingw/win32/lib/libcrypto.a $INSTALL_ROOT/mingw/win32/lib/libcryptostatic.a
+mv -f $INSTALL_ROOT/mingw/win32/lib/libssl.dll.a $INSTALL_ROOT/mingw/win32/lib/libssl.a
+mv -f $INSTALL_ROOT/mingw/win32/lib/libcrypto.dll.a $INSTALL_ROOT/mingw/win32/lib/libcrypto.a
+ln -s libssl.a $INSTALL_ROOT/mingw/win32/lib/libssl.dll.a
+ln -s libcrypto.a $INSTALL_ROOT/mingw/win32/lib/libcrypto.dll.a
 cd ..
 
 mkdir -p openssl-1.0.0l
 cd openssl-1.0.0l
 clean_openssl
 export WINDRES_TARGET=--target=pe-x86-64
-./Configure --cross-compile-prefix="x86_64-w64-mingw32-" --prefix=/jenkins-worker/mingw/win64 \
-	-m64 -I/jenkins-worker/mingw/win64/include -L/jenkins-worker/mingw/win64/lib \
+./Configure --cross-compile-prefix="x86_64-w64-mingw32-" --prefix=$INSTALL_ROOT/mingw/win64 \
+	-m64 -I$INSTALL_ROOT/mingw/win64/include -L$INSTALL_ROOT/mingw/win64/lib \
 	mingw64 zlib shared
 make depend
 make
 make install
 clean_openssl
-mv -f /jenkins-worker/mingw/win64/lib/libssl.a /jenkins-worker/mingw/win64/lib/libsslstatic.a
-mv -f /jenkins-worker/mingw/win64/lib/libcrypto.a /jenkins-worker/mingw/win64/lib/libcryptostatic.a
-mv -f /jenkins-worker/mingw/win64/lib/libssl.dll.a /jenkins-worker/mingw/win64/lib/libssl.a
-mv -f /jenkins-worker/mingw/win64/lib/libcrypto.dll.a /jenkins-worker/mingw/win64/lib/libcrypto.a
-ln -s libssl.a /jenkins-worker/mingw/win64/lib/libssl.dll.a
-ln -s libcrypto.a /jenkins-worker/mingw/win64/lib/libcrypto.dll.a
+mv -f $INSTALL_ROOT/mingw/win64/lib/libssl.a $INSTALL_ROOT/mingw/win64/lib/libsslstatic.a
+mv -f $INSTALL_ROOT/mingw/win64/lib/libcrypto.a $INSTALL_ROOT/mingw/win64/lib/libcryptostatic.a
+mv -f $INSTALL_ROOT/mingw/win64/lib/libssl.dll.a $INSTALL_ROOT/mingw/win64/lib/libssl.a
+mv -f $INSTALL_ROOT/mingw/win64/lib/libcrypto.dll.a $INSTALL_ROOT/mingw/win64/lib/libcrypto.a
+ln -s libssl.a $INSTALL_ROOT/mingw/win64/lib/libssl.dll.a
+ln -s libcrypto.a $INSTALL_ROOT/mingw/win64/lib/libcrypto.dll.a
 cd ..
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -196,7 +198,7 @@ cd icu-cross-build
 rm -rf *
 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O2 -m32" CXXFLAGS="-O2 -m32 --std=c++03" \
 CPPFLAGS="-m32" AR=x86_64-w64-mingw32-ar RANLIB=x86_64-w64-mingw32-ranlib \
-	../icu4c-52_1/source/configure --prefix=/jenkins-worker/mingw/win32 --disable-static --enable-shared=yes \
+	../icu4c-52_1/source/configure --prefix=$INSTALL_ROOT/mingw/win32 --disable-static --enable-shared=yes \
 	--enable-tests=no --enable-samples=no --enable-dyload=no --enable-strict=no --enable-extras=no \
 	--host=i686-w64-mingw32 --with-cross-build=`pwd`/../icu-build
 make -j 3
@@ -207,7 +209,7 @@ cd icu-cross-build
 rm -rf *
 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O2 -m64" CXXFLAGS="-O2 -m64 --std=c++03" \
 CPPFLAGS="-m64" AR=x86_64-w64-mingw32-ar RANLIB=x86_64-w64-mingw32-ranlib \
-	../icu4c-52_1/source/configure --prefix=/jenkins-worker/mingw/win64 --disable-static --enable-shared=yes \
+	../icu4c-52_1/source/configure --prefix=$INSTALL_ROOT/mingw/win64 --disable-static --enable-shared=yes \
 	--enable-tests=no --enable-samples=no --enable-dyload=no --enable-strict=no --enable-extras=no \
 	--host=x86_64-w64-mingw32 --with-cross-build=`pwd`/../icu-build
 make -j 3
@@ -215,8 +217,8 @@ make install
 cd ..
 
 for lib in icudt icuin icuio icule iculx icutest icutu icuuc; do
-	ln -fs ${lib}.dll.a /jenkins-worker/mingw/win32/lib/lib${lib}.a
-	ln -fs ${lib}.dll.a /jenkins-worker/mingw/win64/lib/lib${lib}.a
+	ln -fs ${lib}.dll.a $INSTALL_ROOT/mingw/win32/lib/lib${lib}.a
+	ln -fs ${lib}.dll.a $INSTALL_ROOT/mingw/win64/lib/lib${lib}.a
 done
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -234,7 +236,7 @@ mkdir -p angle-build
 cd angle-build
 rm -rf *
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=`pwd`/../mingw32.cmake \
-	-DCMAKE_INSTALL_PREFIX=/jenkins-worker/mingw/win32 ../angle-patch
+	-DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/mingw/win32 ../angle-patch
 make -j 3
 make install
 cd ..
@@ -242,14 +244,14 @@ cd ..
 cd angle-build
 rm -rf *
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=`pwd`/../mingw64.cmake \
-	-DCMAKE_INSTALL_PREFIX=/jenkins-worker/mingw/win64 ../angle-patch
+	-DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/mingw/win64 ../angle-patch
 make -j 3
 make install
 cd ..
 
 rm -f angle/src/common/commit.h
 
-ln -fs libEGL.dll.a /jenkins-worker/mingw/win32/lib/libEGL.a
-ln -fs libGLESv2.dll.a /jenkins-worker/mingw/win32/lib/libGLESv2.a
-ln -fs libEGL.dll.a /jenkins-worker/mingw/win64/lib/libEGL.a
-ln -fs libGLESv2.dll.a /jenkins-worker/mingw/win64/lib/libGLESv2.a
+ln -fs libEGL.dll.a $INSTALL_ROOT/mingw/win32/lib/libEGL.a
+ln -fs libGLESv2.dll.a $INSTALL_ROOT/mingw/win32/lib/libGLESv2.a
+ln -fs libEGL.dll.a $INSTALL_ROOT/mingw/win64/lib/libEGL.a
+ln -fs libGLESv2.dll.a $INSTALL_ROOT/mingw/win64/lib/libGLESv2.a
