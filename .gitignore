@@ -2,6 +2,7 @@
 /binutils-build
 /cmake-build
 /gcc-build
+/gperf-build
 /icu-build
 /icu-cross-build
 /mingw-build
