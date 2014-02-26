@@ -245,10 +245,16 @@ ln -fs libGLESv2.dll.a $INSTALL_ROOT/mingw/win64/lib/libGLESv2.a
 #  libtool
 # ----------------------------------------------------------------------------------------------------------------
 
+cat > $INSTALL_ROOT/mingw/bin/i686-mingw32-windres <<EOF
+#!/bin/sh
+$INSTALL_ROOT/mingw/bin/x86_64-w64-mingw32-windres --target=pe-i386 \$*
+EOF
+chmod a+x $INSTALL_ROOT/mingw/bin/i686-mingw32-windres
+
 mkdir -p libtool-build
 cd libtool-build
 rm -rf *
-RC="x86_64-w64-mingw32-windres --target=pe-i386" CFLAGS="-m32 -I$INSTALL_ROOT/mingw/win32/include" \
+RC="i686-mingw32-windres" CFLAGS="-m32 -I$INSTALL_ROOT/mingw/win32/include" \
 	../libtool-2.4.2/configure --build=`../libtool-2.4.2/libltdl/config/config.guess` --host=x86_64-w64-mingw32 \
 	--srcdir=../libtool-2.4.2 --prefix=$INSTALL_ROOT/mingw/win32
 make
@@ -258,12 +264,44 @@ cd ..
 mkdir -p libtool-build
 cd libtool-build
 rm -rf *
-RC="x86_64-w64-mingw32-windres --target=pe-x86-64" CFLAGS="-m64 -I$INSTALL_ROOT/mingw/win64/include" \
+RC="x86_64-w64-mingw32-windres" CFLAGS="-m64 -I$INSTALL_ROOT/mingw/win64/include" \
 	../libtool-2.4.2/configure --build=`../libtool-2.4.2/libltdl/config/config.guess` --host=x86_64-w64-mingw32 \
 	--srcdir=../libtool-2.4.2 --prefix=$INSTALL_ROOT/mingw/win64
 make
 make install
 cd ..
+
+# ----------------------------------------------------------------------------------------------------------------
+#  libiconv
+# ----------------------------------------------------------------------------------------------------------------
+
+mkdir -p libiconv-build
+cd libiconv-build
+rm -rf *
+PATH="$INSTALL_ROOT/mingw/win32/bin:$PATH" RC="i686-mingw32-windres" WINDRES="i686-mingw32-windres" \
+	CFLAGS="-m32 -I$INSTALL_ROOT/mingw/win32/include" \
+	../libiconv-1.14/configure --build=`../libiconv-1.14/build-aux/config.guess` --host=x86_64-w64-mingw32 \
+	--srcdir=../libiconv-1.14 --enable-extra-encodings --prefix=$INSTALL_ROOT/mingw/win32 \
+	--enable-shared --disable-static
+make
+make install
+cd ..
+
+mkdir -p libiconv-build
+cd libiconv-build
+rm -rf *
+PATH="$INSTALL_ROOT/mingw/win64/bin:$PATH" CFLAGS="-m64 -I$INSTALL_ROOT/mingw/win64/include" \
+	../libiconv-1.14/configure --build=`../libiconv-1.14/build-aux/config.guess` --host=x86_64-w64-mingw32 \
+	--srcdir=../libiconv-1.14 --enable-extra-encodings --prefix=$INSTALL_ROOT/mingw/win64 \
+	--enable-shared --disable-static
+make
+make install
+cd ..
+
+ln -fs libiconv.dll.a $INSTALL_ROOT/mingw/win32/lib/libiconv.a
+ln -fs libcharset.dll.a $INSTALL_ROOT/mingw/win32/lib/libcharset.a
+ln -fs libiconv.dll.a $INSTALL_ROOT/mingw/win64/lib/libiconv.a
+ln -fs libcharset.dll.a $INSTALL_ROOT/mingw/win64/lib/libcharset.a
 
 # ----------------------------------------------------------------------------------------------------------------
 #  Qt

@@ -5,6 +5,7 @@
 /gperf-build
 /icu-build
 /icu-cross-build
+/libiconv-build
 /libtool-build
 /mingw-build
 /nasm-build
