@@ -202,6 +202,11 @@ for lib in icudt icuin icuio icule iculx icutest icutu icuuc; do
 	ln -fs ${lib}.dll.a $INSTALL_ROOT/mingw/win64/lib/lib${lib}.a
 done
 
+ln -fs icuin.dll.a $INSTALL_ROOT/mingw/win32/lib/libicui18n.a
+ln -fs icudt.dll.a $INSTALL_ROOT/mingw/win32/lib/libicudata.a
+ln -fs icuin.dll.a $INSTALL_ROOT/mingw/win64/lib/libicui18n.a
+ln -fs icudt.dll.a $INSTALL_ROOT/mingw/win64/lib/libicudata.a
+
 # ----------------------------------------------------------------------------------------------------------------
 #  ANGLE
 # ----------------------------------------------------------------------------------------------------------------
@@ -302,6 +307,37 @@ ln -fs libiconv.dll.a $INSTALL_ROOT/mingw/win32/lib/libiconv.a
 ln -fs libcharset.dll.a $INSTALL_ROOT/mingw/win32/lib/libcharset.a
 ln -fs libiconv.dll.a $INSTALL_ROOT/mingw/win64/lib/libiconv.a
 ln -fs libcharset.dll.a $INSTALL_ROOT/mingw/win64/lib/libcharset.a
+
+# ----------------------------------------------------------------------------------------------------------------
+#  libxml2
+# ----------------------------------------------------------------------------------------------------------------
+
+mkdir -p libxml2-build
+cd libxml2-build
+rm -rf *
+PATH="$INSTALL_ROOT/mingw/win32/bin:$PATH" CPPFLAGS="-m32 -I$INSTALL_ROOT/mingw/win32/include" \
+	LDFLAGS="-m32 -L$INSTALL_ROOT/mingw/win32/lib" \
+	../libxml2-2.9.1/configure --build=`../libxml2-2.9.1/config.guess` --host=x86_64-w64-mingw32 \
+	--prefix=$INSTALL_ROOT/mingw/win32 --enable-shared --disable-static --with-fexceptions --without-python \
+	--with-icu --with-iconv
+make
+make install
+cd ..
+
+mkdir -p libxml2-build
+cd libxml2-build
+rm -rf *
+PATH="$INSTALL_ROOT/mingw/win64/bin:$PATH" CPPFLAGS="-m64 -I$INSTALL_ROOT/mingw/win64/include" \
+	LDFLAGS="-m64 -L$INSTALL_ROOT/mingw/win64/lib" \
+	../libxml2-2.9.1/configure --build=`../libxml2-2.9.1/config.guess` --host=x86_64-w64-mingw32 \
+	--prefix=$INSTALL_ROOT/mingw/win64 --enable-shared --disable-static --with-fexceptions --without-python \
+	--with-icu --with-iconv
+make
+make install
+cd ..
+
+ln -fs libxml2.dll.a $INSTALL_ROOT/mingw/win32/lib/libxml2.a
+ln -fs libxml2.dll.a $INSTALL_ROOT/mingw/win64/lib/libxml2.a
 
 # ----------------------------------------------------------------------------------------------------------------
 #  Qt
