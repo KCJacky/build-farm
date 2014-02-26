@@ -19,4 +19,4 @@ echo ""
 sudo apt-get install build-essential flex bison patch gettext texinfo python ruby gperf
 git submodule update --init --recursive
 
-export PATH="$INSTALL_ROOT/bin:$PATH"
+export PATH="$INSTALL_ROOT/bin:$INSTALL_ROOT/mingw/bin:$PATH"
