@@ -17,6 +17,7 @@
 /openssl-1.0.0l/apps/libeay32.dll
 /openssl-1.0.0l/apps/openssl.exe
 /openssl-1.0.0l/apps/ssleay32.dll
+/openssl-1.0.0l/crypto.def
 /openssl-1.0.0l/crypto/aes/aes-586.s
 /openssl-1.0.0l/crypto/aes/*.o
 /openssl-1.0.0l/crypto/aes/lib
@@ -160,3 +161,14 @@
 /openssl-1.0.0l/openssl.pc
 /openssl-1.0.0l/ssleay32.dll
 /openssl-1.0.0l/krb5.h
+/openssl-1.0.0l/rc.o
+/openssl-1.0.0l/crypto/aes/aes-x86_64.s
+/openssl-1.0.0l/crypto/bn/x86_64-mont.s
+/openssl-1.0.0l/crypto/camellia/cmll-x86_64.s
+/openssl-1.0.0l/crypto/md5/md5-x86_64.s
+/openssl-1.0.0l/crypto/rc4/rc4-x86_64.s
+/openssl-1.0.0l/crypto/sha/sha1-x86_64.s
+/openssl-1.0.0l/crypto/sha/sha256-x86_64.s
+/openssl-1.0.0l/crypto/sha/sha512-x86_64.s
+/openssl-1.0.0l/crypto/whrlpool/wp-x86_64.s
+/openssl-1.0.0l/crypto/x86_64cpuid.s

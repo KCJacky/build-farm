@@ -102,7 +102,10 @@ clean_openssl()
 		crypto/bf/bf-586.s crypto/bn/bn-586.s crypto/bn/co-586.s crypto/bn/x86-mont.s crypto/camellia/cmll-x86.s \
 		crypto/des/crypt586.s crypto/des/des-586.s crypto/md5/md5-586.s crypto/rc4/rc4-586.s \
 		crypto/ripemd/rmd-586.s crypto/sha/sha1-586.s crypto/sha/sha256-586.s crypto/sha/sha512-586.s \
-		crypto/uplink-cof.s crypto/whrlpool/wp-mmx.s crypto/x86cpuid.s
+		crypto/uplink-cof.s crypto/whrlpool/wp-mmx.s crypto/x86cpuid.s crypto.def rc.o \
+		crypto/aes/aes-x86_64.s crypto/bn/x86_64-mont.s crypto/camellia/cmll-x86_64.s crypto/md5/md5-x86_64.s \
+		crypto/rc4/rc4-x86_64.s crypto/sha/sha1-x86_64.s crypto/sha/sha256-x86_64.s crypto/sha/sha512-x86_64.s \
+		crypto/whrlpool/wp-x86_64.s crypto/x86_64cpuid.s
 	git checkout tools/c_rehash crypto/opensslconf.h apps/CA.pl Makefile.bak Makefile apps/Makefile \
 		crypto/Makefile crypto/aes/Makefile crypto/asn1/Makefile crypto/bio/Makefile crypto/bn/Makefile \
 		crypto/buffer/Makefile crypto/cms/Makefile crypto/conf/Makefile crypto/des/Makefile crypto/dh/Makefile \
@@ -131,7 +134,7 @@ export WINDRES_TARGET=--target=pe-i386
 	-m32 -I$INSTALL_ROOT/mingw/win32/include -L$INSTALL_ROOT/mingw/win32/lib \
 	mingw zlib shared
 make depend
-make -j "$NUM_CPUS"
+make
 make install
 clean_openssl
 mv -f $INSTALL_ROOT/mingw/win32/lib/libssl.a $INSTALL_ROOT/mingw/win32/lib/libsslstatic.a
@@ -150,7 +153,7 @@ export WINDRES_TARGET=--target=pe-x86-64
 	-m64 -I$INSTALL_ROOT/mingw/win64/include -L$INSTALL_ROOT/mingw/win64/lib \
 	mingw64 zlib shared
 make depend
-make -j "$NUM_CPUS"
+make
 make install
 clean_openssl
 mv -f $INSTALL_ROOT/mingw/win64/lib/libssl.a $INSTALL_ROOT/mingw/win64/lib/libsslstatic.a
