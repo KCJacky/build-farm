@@ -6,6 +6,8 @@
 /icu-build
 /icu-cross-build
 /mingw-build
+/nasm-build
+/nasm-2.11.02/config.h
 /qt-build
 /qt-everywhere-opensource-src-5.2.1/qtbase/.device.vars
 /qt-everywhere-opensource-src-5.2.1/qtbase/.qmake.vars
