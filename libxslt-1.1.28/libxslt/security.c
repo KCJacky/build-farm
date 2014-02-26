@@ -343,7 +343,11 @@ xsltCheckWritePath(xsltSecurityPrefsPtr sec,
 	    }
 	    ret = xsltCheckWritePath(sec, ctxt, directory);
 	    if (ret == 1)
+	  #ifdef _WIN32
+		ret = mkdir(directory);
+	  #else
 		ret = mkdir(directory, 0755);
+	  #endif
 	}
 	xmlFree(directory);
 	if (ret < 0)

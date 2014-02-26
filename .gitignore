@@ -8,6 +8,7 @@
 /libiconv-build
 /libtool-build
 /libxml2-build
+/libxslt-build
 /mingw-build
 /nasm-build
 /nasm-2.11.02/config.h

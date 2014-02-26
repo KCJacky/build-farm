@@ -340,6 +340,37 @@ ln -fs libxml2.dll.a $INSTALL_ROOT/mingw/win32/lib/libxml2.a
 ln -fs libxml2.dll.a $INSTALL_ROOT/mingw/win64/lib/libxml2.a
 
 # ----------------------------------------------------------------------------------------------------------------
+#  libxslt
+# ----------------------------------------------------------------------------------------------------------------
+
+mkdir -p libxslt-build
+cd libxslt-build
+rm -rf *
+PATH="$INSTALL_ROOT/mingw/win32/bin:$PATH" CPPFLAGS="-m32 -I$INSTALL_ROOT/mingw/win32/include" \
+	LDFLAGS="-m32 -L$INSTALL_ROOT/mingw/win32/lib" \
+	../libxslt-1.1.28/configure --build=`../libxslt-1.1.28/config.guess` --host=x86_64-w64-mingw32 \
+	--prefix=$INSTALL_ROOT/mingw/win32 --enable-shared --disable-static --without-python
+make
+make install
+cd ..
+
+mkdir -p libxslt-build
+cd libxslt-build
+rm -rf *
+PATH="$INSTALL_ROOT/mingw/win64/bin:$PATH" CPPFLAGS="-m64 -I$INSTALL_ROOT/mingw/win64/include" \
+	LDFLAGS="-m64 -L$INSTALL_ROOT/mingw/win64/lib" \
+	../libxslt-1.1.28/configure --build=`../libxslt-1.1.28/config.guess` --host=x86_64-w64-mingw32 \
+	--prefix=$INSTALL_ROOT/mingw/win64 --enable-shared --disable-static --without-python
+make
+make install
+cd ..
+
+ln -fs libxslt.dll.a $INSTALL_ROOT/mingw/win32/lib/libxslt.a
+ln -fs libexslt.dll.a $INSTALL_ROOT/mingw/win32/lib/libexslt.a
+ln -fs libxslt.dll.a $INSTALL_ROOT/mingw/win64/lib/libxslt.a
+ln -fs libexslt.dll.a $INSTALL_ROOT/mingw/win64/lib/libexslt.a
+
+# ----------------------------------------------------------------------------------------------------------------
 #  Qt
 # ----------------------------------------------------------------------------------------------------------------
 
