@@ -248,7 +248,7 @@ ln -fs libGLESv2.dll.a $INSTALL_ROOT/mingw/win64/lib/libGLESv2.a
 mkdir -p libtool-build
 cd libtool-build
 rm -rf *
-CFLAGS="-m32 -I$INSTALL_ROOT/mingw/win32/include" \
+RC="x86_64-w64-mingw32-windres --target=pe-i386" CFLAGS="-m32 -I$INSTALL_ROOT/mingw/win32/include" \
 	../libtool-2.4.2/configure --build=`../libtool-2.4.2/libltdl/config/config.guess` --host=x86_64-w64-mingw32 \
 	--srcdir=../libtool-2.4.2 --prefix=$INSTALL_ROOT/mingw/win32
 make
@@ -258,13 +258,12 @@ cd ..
 mkdir -p libtool-build
 cd libtool-build
 rm -rf *
-CFLAGS="-m64 -I$INSTALL_ROOT/mingw/win64/include" \
+RC="x86_64-w64-mingw32-windres --target=pe-x86-64" CFLAGS="-m64 -I$INSTALL_ROOT/mingw/win64/include" \
 	../libtool-2.4.2/configure --build=`../libtool-2.4.2/libltdl/config/config.guess` --host=x86_64-w64-mingw32 \
 	--srcdir=../libtool-2.4.2 --prefix=$INSTALL_ROOT/mingw/win64
 make
 make install
 cd ..
-
 
 # ----------------------------------------------------------------------------------------------------------------
 #  Qt
