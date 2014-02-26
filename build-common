@@ -1,0 +1,22 @@
+
+INSTALL_ROOT=/var/build-farm
+NUM_CPUS=`cat /proc/cpuinfo | egrep 'processor[^:]*:[^0-9]*[0-9]+' | wc -l`
+
+if [ -z "$NUM_CPUS" -o "$NUM_CPUS" -lt 2 ]; then
+	NUM_CPUS=2
+fi
+
+if [ "$NUM_CPUS" -gt 8 ]; then
+	NUM_CPUS=8
+fi
+
+echo "******************************************************************************"
+echo "NUM_CPUS = $NUM_CPUS"
+echo "INSTALL_ROOT = \"$INSTALL_ROOT\""
+echo "******************************************************************************"
+echo ""
+
+sudo apt-get install build-essential flex bison patch gettext texinfo python ruby gperf
+git submodule update --init --recursive
+
+export PATH="$INSTALL_ROOT/bin:$PATH"

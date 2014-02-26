@@ -2,10 +2,8 @@
 
 set -e
 
-INSTALL_ROOT=/var/build-farm
-
-sudo apt-get install build-essential flex bison patch gettext texinfo
-git submodule update --init --recursive
+. ./build-common
+export PATH="$INSTALL_ROOT/mingw/bin:$PATH"
 
 # ----------------------------------------------------------------------------------------------------------------
 #  Binutils
@@ -16,15 +14,13 @@ cd binutils-build
 rm -rf *
 ../binutils-2.24/configure --target=x86_64-w64-mingw32 --enable-targets=x86_64-w64-mingw32,i686-w64-mingw32 \
 	--with-sysroot=$INSTALL_ROOT/mingw --prefix=$INSTALL_ROOT/mingw
-make
+make -j "$NUM_CPUS"
 make install
 cd ..
 
 # ----------------------------------------------------------------------------------------------------------------
 #  MinGW headers
 # ----------------------------------------------------------------------------------------------------------------
-
-export PATH="$INSTALL_ROOT/mingw/bin:$PATH"
 
 mkdir -p mingw-build
 cd mingw-build
@@ -46,7 +42,7 @@ cd gcc-build
 rm -rf *
 ../gcc-4.8.2/configure --target=x86_64-w64-mingw32 --enable-targets=all --with-sysroot=$INSTALL_ROOT/mingw \
 	--prefix=$INSTALL_ROOT/mingw
-make all-gcc
+make -j "$NUM_CPUS" all-gcc
 make install-gcc
 cd ..
 
@@ -58,7 +54,7 @@ cd mingw-build
 ../mingw-w64-v3.1.0/configure --build=`../binutils-2.24/config.guess` --host=x86_64-w64-mingw32 \
 	--enable-lib32 --with-sysroot=$INSTALL_ROOT/mingw --prefix=$INSTALL_ROOT/mingw/x86_64-w64-mingw32 \
 	--with-crt
-make
+make -j "$NUM_CPUS"
 make install
 cd ..
 
@@ -67,26 +63,9 @@ cd ..
 # ----------------------------------------------------------------------------------------------------------------
 
 cd gcc-build
-make
+make -j "$NUM_CPUS"
 make install
 cd ..
-
-# ----------------------------------------------------------------------------------------------------------------
-#  CMake (not cross-platform)
-# ----------------------------------------------------------------------------------------------------------------
-
-mkdir -p cmake-build
-cd cmake-build
-../cmake-2.8.12.2/configure --prefix=$INSTALL_ROOT
-make -j 3
-make install
-cd ..
-
-export PATH="$INSTALL_ROOT/bin:$PATH"
-
-mkdir -p $INSTALL_ROOT/cmake
-cp -f mingw32.cmake $INSTALL_ROOT/cmake/
-cp -f mingw64.cmake $INSTALL_ROOT/cmake/
 
 # ----------------------------------------------------------------------------------------------------------------
 #  zlib
@@ -97,7 +76,7 @@ cd zlib-build
 rm -rf *
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$INSTALL_ROOT/cmake/mingw32.cmake \
 	-DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/mingw/win32 ../zlib-1.2.8
-make
+make -j "$NUM_CPUS"
 make install
 cd ..
 
@@ -105,7 +84,7 @@ cd zlib-build
 rm -rf *
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$INSTALL_ROOT/cmake/mingw64.cmake \
 	-DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/mingw/win64 ../zlib-1.2.8
-make
+make -j "$NUM_CPUS"
 make install
 cd ..
 
@@ -152,7 +131,7 @@ export WINDRES_TARGET=--target=pe-i386
 	-m32 -I$INSTALL_ROOT/mingw/win32/include -L$INSTALL_ROOT/mingw/win32/lib \
 	mingw zlib shared
 make depend
-make
+make -j "$NUM_CPUS"
 make install
 clean_openssl
 mv -f $INSTALL_ROOT/mingw/win32/lib/libssl.a $INSTALL_ROOT/mingw/win32/lib/libsslstatic.a
@@ -171,7 +150,7 @@ export WINDRES_TARGET=--target=pe-x86-64
 	-m64 -I$INSTALL_ROOT/mingw/win64/include -L$INSTALL_ROOT/mingw/win64/lib \
 	mingw64 zlib shared
 make depend
-make
+make -j "$NUM_CPUS"
 make install
 clean_openssl
 mv -f $INSTALL_ROOT/mingw/win64/lib/libssl.a $INSTALL_ROOT/mingw/win64/lib/libsslstatic.a
@@ -190,7 +169,7 @@ mkdir -p icu-build
 cd icu-build
 rm -rf *
 ../icu4c-52_1/source/configure
-make
+make -j "$NUM_CPUS"
 cd ..
 
 mkdir -p icu-cross-build
@@ -201,7 +180,7 @@ CPPFLAGS="-m32" AR=x86_64-w64-mingw32-ar RANLIB=x86_64-w64-mingw32-ranlib \
 	../icu4c-52_1/source/configure --prefix=$INSTALL_ROOT/mingw/win32 --disable-static --enable-shared=yes \
 	--enable-tests=no --enable-samples=no --enable-dyload=no --enable-strict=no --enable-extras=no \
 	--host=i686-w64-mingw32 --with-cross-build=`pwd`/../icu-build
-make -j 3
+make -j "$NUM_CPUS"
 make install
 cd ..
 
@@ -212,7 +191,7 @@ CPPFLAGS="-m64" AR=x86_64-w64-mingw32-ar RANLIB=x86_64-w64-mingw32-ranlib \
 	../icu4c-52_1/source/configure --prefix=$INSTALL_ROOT/mingw/win64 --disable-static --enable-shared=yes \
 	--enable-tests=no --enable-samples=no --enable-dyload=no --enable-strict=no --enable-extras=no \
 	--host=x86_64-w64-mingw32 --with-cross-build=`pwd`/../icu-build
-make -j 3
+make -j "$NUM_CPUS"
 make install
 cd ..
 
@@ -237,7 +216,7 @@ cd angle-build
 rm -rf *
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=`pwd`/../mingw32.cmake \
 	-DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/mingw/win32 ../angle-patch
-make -j 3
+make -j "$NUM_CPUS"
 make install
 cd ..
 
@@ -245,7 +224,7 @@ cd angle-build
 rm -rf *
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=`pwd`/../mingw64.cmake \
 	-DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/mingw/win64 ../angle-patch
-make -j 3
+make -j "$NUM_CPUS"
 make install
 cd ..
 
@@ -276,8 +255,8 @@ cd qt-build
 rm -rf *
 cleanup_qt
 ../qt-everywhere-opensource-src-5.2.1/configure \
-	-prefix $INSTALL_ROOT/mingw/win32 -extprefix $INSTALL_ROOT/mingw/win32 -hostprefix $INSTALL_ROOT \
-	-sysroot $INSTALL_ROOT/mingw -I$INSTALL_ROOT/mingw/win32/include -L$INSTALL_ROOT/mingw/win32/lib \
+	-prefix $INSTALL_ROOT/mingw/win32 -extprefix $INSTALL_ROOT/mingw/win32 -hostprefix $INSTALL_ROOT/mingw \
+	-sysroot $INSTALL_ROOT/mingw/win32 -I$INSTALL_ROOT/mingw/win32/include -L$INSTALL_ROOT/mingw/win32/lib \
 	-release -opensource -confirm-license -shared -largefile -no-sql-odbc -qt-sql-sqlite \
 	-no-pkg-config -system-zlib -qt-libpng -qt-libjpeg -qt-freetype -no-harfbuzz -openssl-linked \
 	-qt-imageformat-png -qt-imageformat-jpeg -qt-imageformat-gif -qt-pcre -no-xcb -no-compile-examples \
@@ -285,7 +264,7 @@ cleanup_qt
 	-no-directfb -no-linuxfb -no-kms -system-proxies -nomake tests -egl -opengl es2 -xplatform win32-g++ \
 	-device-option CROSS_COMPILE=x86_64-w64-mingw32- -device-option CROSS_COMPILE_M=-m32 \
 	-device-option CROSS_COMPILE_WINDRES_TARGET=--target=pe-i386 --add_link=EGL -no-eglfs
-make -j 3
+make -j "$NUM_CPUS"
 make install
 cleanup_qt
 cd ..
@@ -294,16 +273,16 @@ cd qt-build
 rm -rf *
 cleanup_qt
 ../qt-everywhere-opensource-src-5.2.1/configure \
-	-prefix $INSTALL_ROOT/mingw/win64 -extprefix $INSTALL_ROOT/mingw/win64 -hostprefix $INSTALL_ROOT \
-	-sysroot $INSTALL_ROOT/mingw -I$INSTALL_ROOT/mingw/win64/include -L$INSTALL_ROOT/mingw/win64/lib \
+	-prefix $INSTALL_ROOT/mingw/win64 -extprefix $INSTALL_ROOT/mingw/win64 -hostprefix $INSTALL_ROOT/mingw \
+	-sysroot $INSTALL_ROOT/mingw/win64 -I$INSTALL_ROOT/mingw/win64/include -L$INSTALL_ROOT/mingw/win64/lib \
 	-release -opensource -confirm-license -shared -largefile -no-sql-odbc -qt-sql-sqlite \
 	-no-pkg-config -system-zlib -qt-libpng -qt-libjpeg -qt-freetype -no-harfbuzz -openssl-linked \
 	-qt-imageformat-png -qt-imageformat-jpeg -qt-imageformat-gif -qt-pcre -no-xcb -no-compile-examples \
 	-nomake examples -gui -widgets -no-cups -icu -no-fontconfig -strip -no-dbus -pch -qpa windows \
-	-no-directfb -no-linuxfb -no-kms -system-proxies -nomake tests -egl -opengl es2 -xplatform win64-g++ \
+	-no-directfb -no-linuxfb -no-kms -system-proxies -nomake tests -egl -opengl es2 -xplatform win32-g++ \
 	-device-option CROSS_COMPILE=x86_64-w64-mingw32- -device-option CROSS_COMPILE_M=-m64 \
 	-device-option CROSS_COMPILE_WINDRES_TARGET=--target=pe-x86-64 --add_link=EGL -no-eglfs
-make -j 3
+make -j "$NUM_CPUS"
 make install
 cleanup_qt
 cd ..
