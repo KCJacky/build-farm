@@ -5,6 +5,7 @@
 /gperf-build
 /icu-build
 /icu-cross-build
+/libtool-build
 /mingw-build
 /nasm-build
 /nasm-2.11.02/config.h

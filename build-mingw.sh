@@ -242,6 +242,31 @@ ln -fs libEGL.dll.a $INSTALL_ROOT/mingw/win64/lib/libEGL.a
 ln -fs libGLESv2.dll.a $INSTALL_ROOT/mingw/win64/lib/libGLESv2.a
 
 # ----------------------------------------------------------------------------------------------------------------
+#  libtool
+# ----------------------------------------------------------------------------------------------------------------
+
+mkdir -p libtool-build
+cd libtool-build
+rm -rf *
+CFLAGS="-m32 -I$INSTALL_ROOT/mingw/win32/include" \
+	../libtool-2.4.2/configure --build=`../libtool-2.4.2/libltdl/config/config.guess` --host=x86_64-w64-mingw32 \
+	--srcdir=../libtool-2.4.2 --prefix=$INSTALL_ROOT/mingw/win32
+make
+make install
+cd ..
+
+mkdir -p libtool-build
+cd libtool-build
+rm -rf *
+CFLAGS="-m64 -I$INSTALL_ROOT/mingw/win64/include" \
+	../libtool-2.4.2/configure --build=`../libtool-2.4.2/libltdl/config/config.guess` --host=x86_64-w64-mingw32 \
+	--srcdir=../libtool-2.4.2 --prefix=$INSTALL_ROOT/mingw/win64
+make
+make install
+cd ..
+
+
+# ----------------------------------------------------------------------------------------------------------------
 #  Qt
 # ----------------------------------------------------------------------------------------------------------------
 
