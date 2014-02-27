@@ -378,14 +378,16 @@ cleanup_qt()
 {
 	rm -f ../qt-everywhere-opensource-src-5.2.1/qtbase/.device.vars \
 		../qt-everywhere-opensource-src-5.2.1/qtbase/.qmake.vars \
-		../qt-everywhere-opensource-src-5.2.1/qtbase/config.tests/.qmake.cache
+		../qt-everywhere-opensource-src-5.2.1/qtbase/config.tests/.qmake.cache \
+		../qt-everywhere-opensource-src-5.2.1/qtwebkit/Source/WebCore/inspector/CodeGeneratorInspectorStrings.pyc
 }
 
 mkdir -p qt-build
 cd qt-build
 rm -rf *
 cleanup_qt
-../qt-everywhere-opensource-src-5.2.1/configure \
+WEBKIT_INC=$INSTALL_ROOT/mingw/win32/include WEBKIT_LIB=$INSTALL_ROOT/mingw/win32/lib \
+	../qt-everywhere-opensource-src-5.2.1/configure \
 	-prefix $INSTALL_ROOT/mingw/win32 -extprefix $INSTALL_ROOT/mingw/win32 -hostprefix $INSTALL_ROOT/mingw \
 	-sysroot $INSTALL_ROOT/mingw/win32 -I$INSTALL_ROOT/mingw/win32/include -L$INSTALL_ROOT/mingw/win32/lib \
 	-release -opensource -confirm-license -shared -largefile -no-sql-odbc -qt-sql-sqlite \
@@ -394,7 +396,9 @@ cleanup_qt
 	-nomake examples -gui -widgets -no-cups -icu -no-fontconfig -strip -no-dbus -pch -qpa windows \
 	-no-directfb -no-linuxfb -no-kms -system-proxies -nomake tests -egl -opengl es2 -xplatform win32-g++ \
 	-device-option CROSS_COMPILE=x86_64-w64-mingw32- -device-option CROSS_COMPILE_M=-m32 \
-	-device-option CROSS_COMPILE_WINDRES_TARGET=--target=pe-i386 --add_link=EGL -no-eglfs
+	-device-option CROSS_COMPILE_WINDRES_TARGET=--target=pe-i386 --add_link=EGL -no-eglfs \
+	-device-option CROSS_COMPILE_INCDIR=-I$INSTALL_ROOT/mingw/win32/include \
+	-device-option CROSS_COMPILE_LIBDIR=-L$INSTALL_ROOT/mingw/win32/lib
 make -j "$NUM_CPUS"
 make install
 cleanup_qt
@@ -403,7 +407,8 @@ cd ..
 cd qt-build
 rm -rf *
 cleanup_qt
-../qt-everywhere-opensource-src-5.2.1/configure \
+WEBKIT_INC=$INSTALL_ROOT/mingw/win64/include WEBKIT_LIB=$INSTALL_ROOT/mingw/win64/lib \
+	../qt-everywhere-opensource-src-5.2.1/configure -v \
 	-prefix $INSTALL_ROOT/mingw/win64 -extprefix $INSTALL_ROOT/mingw/win64 -hostprefix $INSTALL_ROOT/mingw \
 	-sysroot $INSTALL_ROOT/mingw/win64 -I$INSTALL_ROOT/mingw/win64/include -L$INSTALL_ROOT/mingw/win64/lib \
 	-release -opensource -confirm-license -shared -largefile -no-sql-odbc -qt-sql-sqlite \
@@ -412,7 +417,9 @@ cleanup_qt
 	-nomake examples -gui -widgets -no-cups -icu -no-fontconfig -strip -no-dbus -pch -qpa windows \
 	-no-directfb -no-linuxfb -no-kms -system-proxies -nomake tests -egl -opengl es2 -xplatform win32-g++ \
 	-device-option CROSS_COMPILE=x86_64-w64-mingw32- -device-option CROSS_COMPILE_M=-m64 \
-	-device-option CROSS_COMPILE_WINDRES_TARGET=--target=pe-x86-64 --add_link=EGL -no-eglfs
+	-device-option CROSS_COMPILE_WINDRES_TARGET=--target=pe-x86-64 --add_link=EGL -no-eglfs \
+	-device-option CROSS_COMPILE_INCDIR=-I$INSTALL_ROOT/mingw/win64/include \
+	-device-option CROSS_COMPILE_LIBDIR=-L$INSTALL_ROOT/mingw/win64/lib
 make -j "$NUM_CPUS"
 make install
 cleanup_qt

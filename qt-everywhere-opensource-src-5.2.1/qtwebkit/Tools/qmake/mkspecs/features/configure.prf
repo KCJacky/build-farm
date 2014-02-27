@@ -120,9 +120,9 @@ defineTest(finalizeConfigure) {
         addReasonForSkippingBuild("QtWebKit cannot be built as a static library on this platform. Check your configuration in qtbase/config.summary.")
     }
     requiredPrograms = gperf python perl bison ruby flex
-    for(program, requiredPrograms): \
-        !programExistsInPath($$program): \
-            addReasonForSkippingBuild("Missing $$program from PATH")
+#    for(program, requiredPrograms): \
+#        !programExistsInPath($$program): \
+#            addReasonForSkippingBuild("Missing $$program from PATH")
 
     requiredModules = gui
     for(module, requiredModules): \

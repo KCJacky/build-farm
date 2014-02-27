@@ -5934,7 +5934,7 @@ fi
 if [ "$XPLATFORM_MINGW" = "yes" ]; then
     # mkspecs/features/win32/default_pre.prf sets "no-rtti".
     # Follow default behavior of configure.exe by overriding with "rtti".
-    QTCONFIG_CONFIG="$QTCONFIG_CONFIG rtti"
+    QTCONFIG_CONFIG="$QTCONFIG_CONFIG rtti exceptions"
 fi
 
 if [ "$CFG_ALSA" = "yes" ]; then
